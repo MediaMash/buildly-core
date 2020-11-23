@@ -7,6 +7,6 @@ Click the button below to go straight to your event
 
 Next steps
 Once you have registered, you will be within {{ organization_name }}'s portfolio.
-Incase you forgot your room id is {{ room_id }} and event id is {{ event_id }}
+Incase you forgot your room id is {{ room_uuid }} and event id is {{ event_uuid }}
 
 MediaMash
