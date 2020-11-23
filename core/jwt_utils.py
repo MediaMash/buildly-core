@@ -48,12 +48,12 @@ def create_invitation_token(email_address: str, organization: Organization):
     return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256').decode('utf-8')
 
 
-def create_invitation_token_event(email_address: str, organization: str, room_id: int, event_id: int):
+def create_invitation_token_event(email_address: str, organization: str, room_uuid: int, event_uuid: int):
     exp_hours = datetime.timedelta(hours=settings.INVITATION_EXPIRE_HOURS)
     payload = {
         'email': email_address,
-        'room_id': room_id,
-        'event_id': event_id,
+        'room_uuid': room_uuid,
+        'event_uuid': event_uuid,
         'organization': organization,
         'exp': datetime.datetime.utcnow() + exp_hours
     }

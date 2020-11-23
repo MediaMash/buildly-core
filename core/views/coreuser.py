@@ -270,13 +270,13 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     @action(methods=['POST'], detail=False)
     def invite_event(self, request, *args, **kwargs):
         """
-        a)Request Event ID, Room Id, Email - Array
+        a)Request Event uuid, Room uuid, Email - Array
         b)Identify user type and send relevant emails with link to Registered and Unregistered user
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        event_id = request.data['event_id']
-        room_id = request.data['room_id']
+        event_uuid = request.data['event_uuid']
+        room_uuid = request.data['room_uuid']
         emails = request.data['emails']
         event_name = request.data['event_name']
         organization_name = request.data['organization_name']
@@ -293,7 +293,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                 reg_location = urljoin(settings.FRONTEND_URL,
                                        settings.EVENT_LOGIN_URL_PATH)
                 reg_location = reg_location + '?token={}'
-                token = create_invitation_token_event(email_address, organization, room_id, event_id)
+                token = create_invitation_token_event(email_address, organization, room_uuid, event_uuid)
                 invitation_link = self.request.build_absolute_uri(
                     reg_location.format(token)
                 )
@@ -302,8 +302,8 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                 context = {
                     'organization_name': organization,
                     'event_link': invitation_link,
-                    'event_id': event_id,
-                    'room_id': room_id,
+                    'event_uuid': event_uuid,
+                    'room_uuid': room_uuid,
                     'event_name': event_name
                 }
                 template_name = 'email/coreuser/invite_event.txt'
@@ -320,7 +320,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                 reg_location = urljoin(settings.FRONTEND_URL,
                                        settings.EVENT_REGISTRATION_URL_PATH)
                 reg_location = reg_location + '?token={}'
-                token = create_invitation_token_event(email_address, organization, room_id, event_id)
+                token = create_invitation_token_event(email_address, organization, room_uuid, event_uuid)
                 # build the invitation link
                 invitation_link = self.request.build_absolute_uri(
                     reg_location.format(token)
@@ -330,8 +330,8 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                 context = {
                     'organization_name': organization,
                     'event_link':  invitation_link,
-                    'event_id': event_id,
-                    'room_id': room_id,
+                    'event_uuid': event_uuid,
+                    'room_uuid': room_uuid,
                     'event_name': event_name
                 }
                 template_name = 'email/coreuser/invite_event.txt'
@@ -350,7 +350,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     def invite_event_check(self, request, *args, **kwargs):
         """
         This endpoint is used to validate invitation token for event and return
-        the information about email,organization,room_id and event_id
+        the information about email,organization,room_uuid and event_uuid
         """
         try:
             token = self.request.query_params['token']
@@ -370,6 +370,6 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         return Response({
             'email': decoded['email'],
             'organization': decoded['organization'],
-            'room_id': decoded['room_id'],
-            'event_id': decoded['event_id']
+            'room_uuid': decoded['room_uuid'],
+            'event_uuid': decoded['event_uuid']
         }, status=status.HTTP_200_OK)
