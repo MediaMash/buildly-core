@@ -157,7 +157,7 @@ class CoreUserInvitationSerializer(serializers.Serializer):
 class CoreUserEventInvitationSerializer(serializers.Serializer):
     """
     Serializer for event invitation
-    """    
+    """
     room_uuid = serializers.UUIDField()
     event_uuid = serializers.UUIDField()
     emails = serializers.ListField(child=serializers.CharField(),
