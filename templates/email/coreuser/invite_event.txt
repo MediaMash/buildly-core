@@ -1,7 +1,7 @@
 
 Invitation from {{ organization_name }}
 
-You have been invited to join an event on MediaMash!
+You have been invited to join an {{ event_name }} on {{ organization_name }}!
 Click the button below to go straight to your event
 {{ event_link }}
 

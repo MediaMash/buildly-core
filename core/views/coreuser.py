@@ -278,7 +278,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         event_id = request.data['event_id']
         room_id = request.data['room_id']
         emails = request.data['emails']
-        event_name= request.data['event_name']
+        event_name = request.data['event_name']
         organization_name = request.data['organization_name']
         invitation_link_list = []
         for email in emails:
@@ -286,7 +286,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
             # if the user is registered
             if user:
                 """
-                for registered users send them a test email "Registered Users! Welcome to a new event on MediaMash".
+                for registered users send them a test email "Registered Users! Welcome to a new event at organization".
                 """
                 email_address = email
                 organization = str(user.organization)
@@ -298,13 +298,13 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                     reg_location.format(token)
                 )
                 invitation_link_list.append(invitation_link)
-                subject = 'Welcome to a {} at {}'.format(event_name,organization)
+                subject = 'Welcome to event {} at {}'.format(event_name, organization)
                 context = {
                     'organization_name': organization,
                     'event_link': invitation_link,
                     'event_id': event_id,
                     'room_id': room_id,
-                    'event_name':event_name
+                    'event_name': event_name
                 }
                 template_name = 'email/coreuser/invite_event.txt'
                 html_template_name = 'email/coreuser/invite_event.html'
@@ -313,7 +313,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
             else:
                 """
                 for unregistered users send them a test email "Unregistered Users!
-                Welcome to a new event on MediaMash'".
+                Welcome to a new event at organization'".
                 """
                 email_address = email
                 organization = organization_name
@@ -326,13 +326,13 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                     reg_location.format(token)
                 )
                 invitation_link_list.append(invitation_link)
-                subject = 'Welcome to a {} at {}'.format(event_name,organization)
+                subject = 'Welcome to event {} at {}'.format(event_name, organization)
                 context = {
                     'organization_name': organization,
                     'event_link':  invitation_link,
                     'event_id': event_id,
                     'room_id': room_id,
-                    'event_name':event_name
+                    'event_name': event_name
                 }
                 template_name = 'email/coreuser/invite_event.txt'
                 html_template_name = 'email/coreuser/invite_event.html'
