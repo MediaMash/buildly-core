@@ -47,8 +47,8 @@ COREUSER_INVITE_EVENT_CHECK_RESPONSE = {200: Schema(
     type='object',
     properties={
         'email': Schema(type='string'),
-        'room_uuid': Schema(type='number'),
-        'event_uuid': Schema(type='number'),
+        'room_uuid': Schema(type='string'),
+        'event_uuid': Schema(type='string'),
         'organization': Schema(type='string'),
     })
 
