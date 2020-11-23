@@ -279,6 +279,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         room_id = request.data['room_id']
         emails = request.data['emails']
         event_name= request.data['event_name']
+        organization_name = request.data['organization_name']
         invitation_link_list = []
         for email in emails:
             user = CoreUser.objects.filter(email=email).first()
@@ -297,7 +298,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                     reg_location.format(token)
                 )
                 invitation_link_list.append(invitation_link)
-                subject = 'Registered Users! Welcome to a new event on MediaMash'
+                subject = 'Welcome to a {} at {}'.format(event_name,organization)
                 context = {
                     'organization_name': organization,
                     'event_link': invitation_link,
@@ -305,7 +306,6 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                     'room_id': room_id,
                     'event_name':event_name
                 }
-                print('context for unregistered user is -->', context)
                 template_name = 'email/coreuser/invite_event.txt'
                 html_template_name = 'email/coreuser/invite_event.html'
                 send_email(email_address, subject, context, template_name, html_template_name)
@@ -316,7 +316,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                 Welcome to a new event on MediaMash'".
                 """
                 email_address = email
-                organization = 'MediaMash'
+                organization = organization_name
                 reg_location = urljoin(settings.FRONTEND_URL,
                                        settings.EVENT_REGISTRATION_URL_PATH)
                 reg_location = reg_location + '?token={}'
@@ -326,7 +326,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                     reg_location.format(token)
                 )
                 invitation_link_list.append(invitation_link)
-                subject = 'Unregistered Users! Welcome to a new event on MediaMash'
+                subject = 'Welcome to a {} at {}'.format(event_name,organization)
                 context = {
                     'organization_name': organization,
                     'event_link':  invitation_link,

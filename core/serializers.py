@@ -163,6 +163,7 @@ class CoreUserEventInvitationSerializer(serializers.Serializer):
     emails = serializers.ListField(child=serializers.CharField(),
                                    min_length=1, max_length=10)
     event_name = serializers.CharField()
+    organization_name = serializers.CharField()
 
 
 class CoreUserResetPasswordSerializer(serializers.Serializer):
