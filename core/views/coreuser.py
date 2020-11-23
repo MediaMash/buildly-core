@@ -13,12 +13,14 @@ from drf_yasg.utils import swagger_auto_schema
 from core.models import CoreUser, Organization
 from core.serializers import (CoreUserSerializer, CoreUserWritableSerializer, CoreUserInvitationSerializer,
                               CoreUserResetPasswordSerializer, CoreUserResetPasswordCheckSerializer,
-                              CoreUserResetPasswordConfirmSerializer)
+                              CoreUserResetPasswordConfirmSerializer, CoreUserEventInvitationSerializer,)
 from core.permissions import AllowAuthenticatedRead, AllowOnlyOrgAdmin, IsOrgMember
 from core.swagger import (COREUSER_INVITE_RESPONSE, COREUSER_INVITE_CHECK_RESPONSE, COREUSER_RESETPASS_RESPONSE,
-                          DETAIL_RESPONSE, SUCCESS_RESPONSE, TOKEN_QUERY_PARAM)
-from core.jwt_utils import create_invitation_token
+                          DETAIL_RESPONSE, SUCCESS_RESPONSE, TOKEN_QUERY_PARAM, COREUSER_INVITE_EVENT_CHECK_RESPONSE,)
+from core.jwt_utils import create_invitation_token, create_invitation_token_event
 from core.email_utils import send_email
+
+from rest_framework.permissions import AllowAny
 
 
 class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -56,6 +58,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         'reset_password': CoreUserResetPasswordSerializer,
         'reset_password_check': CoreUserResetPasswordCheckSerializer,
         'reset_password_confirm': CoreUserResetPasswordConfirmSerializer,
+        'invite_event': CoreUserEventInvitationSerializer,
     }
 
     def list(self, request, *args, **kwargs):
@@ -258,3 +261,115 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     queryset = CoreUser.objects.all()
     permission_classes = (AllowAuthenticatedRead,)
+
+    # @transaction.atomic
+
+    @swagger_auto_schema(methods=['post'],
+                         request_body=CoreUserEventInvitationSerializer,
+                         responses=SUCCESS_RESPONSE)
+    @action(methods=['POST'], detail=False)
+    def invite_event(self, request, *args, **kwargs):
+        """
+        a)Request Event ID, Room Id, Email - Array
+        b)Identify user type and send relevant emails with link to Registered and Unregistered user
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        event_id = request.data['event_id']
+        room_id = request.data['room_id']
+        emails = request.data['emails']
+        event_name = request.data['event_name']
+        organization_name = request.data['organization_name']
+        invitation_link_list = []
+        for email in emails:
+            user = CoreUser.objects.filter(email=email).first()
+            # if the user is registered
+            if user:
+                """
+                for registered users send them a test email "Registered Users! Welcome to a new event at organization".
+                """
+                email_address = email
+                organization = str(user.organization)
+                reg_location = urljoin(settings.FRONTEND_URL,
+                                       settings.EVENT_LOGIN_URL_PATH)
+                reg_location = reg_location + '?token={}'
+                token = create_invitation_token_event(email_address, organization, room_id, event_id)
+                invitation_link = self.request.build_absolute_uri(
+                    reg_location.format(token)
+                )
+                invitation_link_list.append(invitation_link)
+                subject = 'Welcome to event {} at {}'.format(event_name, organization)
+                context = {
+                    'organization_name': organization,
+                    'event_link': invitation_link,
+                    'event_id': event_id,
+                    'room_id': room_id,
+                    'event_name': event_name
+                }
+                template_name = 'email/coreuser/invite_event.txt'
+                html_template_name = 'email/coreuser/invite_event.html'
+                send_email(email_address, subject, context, template_name, html_template_name)
+            # if the user is not registered
+            else:
+                """
+                for unregistered users send them a test email "Unregistered Users!
+                Welcome to a new event at organization'".
+                """
+                email_address = email
+                organization = organization_name
+                reg_location = urljoin(settings.FRONTEND_URL,
+                                       settings.EVENT_REGISTRATION_URL_PATH)
+                reg_location = reg_location + '?token={}'
+                token = create_invitation_token_event(email_address, organization, room_id, event_id)
+                # build the invitation link
+                invitation_link = self.request.build_absolute_uri(
+                    reg_location.format(token)
+                )
+                invitation_link_list.append(invitation_link)
+                subject = 'Welcome to event {} at {}'.format(event_name, organization)
+                context = {
+                    'organization_name': organization,
+                    'event_link':  invitation_link,
+                    'event_id': event_id,
+                    'room_id': room_id,
+                    'event_name': event_name
+                }
+                template_name = 'email/coreuser/invite_event.txt'
+                html_template_name = 'email/coreuser/invite_event.html'
+                send_email(email_address, subject, context, template_name, html_template_name)
+        return Response(
+            {
+                'detail': 'The invitations were sent successfully.',
+                'event_link': [invitation_link_list],
+            }, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(methods=['get'],
+                         responses=COREUSER_INVITE_EVENT_CHECK_RESPONSE,
+                         manual_parameters=[TOKEN_QUERY_PARAM])
+    @action(methods=['GET'], detail=False, permission_classes=[AllowAny])
+    def invite_event_check(self, request, *args, **kwargs):
+        """
+        This endpoint is used to validate invitation token for event and return
+        the information about email,organization,room_id and event_id
+        """
+        try:
+            token = self.request.query_params['token']
+        except KeyError:
+            return Response({'detail': 'No token is provided.'},
+                            status.HTTP_401_UNAUTHORIZED)
+        try:
+            decoded = jwt.decode(token, settings.SECRET_KEY,
+                                 algorithms='HS256')
+        except jwt.DecodeError:
+            return Response({'detail': 'Token is not valid.'},
+                            status.HTTP_401_UNAUTHORIZED)
+        except jwt.ExpiredSignatureError:
+            return Response({'detail': 'Token is expired.'},
+                            status.HTTP_401_UNAUTHORIZED)
+
+        return Response({
+            'email': decoded['email'],
+            'organization': decoded['organization'],
+            'room_id': decoded['room_id'],
+            'event_id': decoded['event_id']
+        }, status=status.HTTP_200_OK)
