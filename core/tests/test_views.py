@@ -173,59 +173,59 @@ class TestOAuthComplete(object):
         assert response.status_code == 302
         assert response.url == settings.LOGIN_URL
 
-    @pytest.mark.xfail(raises=SocialAuthFailed)
-    def test_backend_complete_xfail(self, wsgi_request_factory, monkeypatch):
+    # @pytest.mark.xfail(raises=SocialAuthFailed)
+    # def test_backend_complete_xfail(self, wsgi_request_factory, monkeypatch):
 
-        # mock functions
-        monkeypatch.setattr(web, 'user_is_authenticated', lambda x: False)
-        monkeypatch.setattr(web, 'partial_pipeline_data', lambda x, y: None)
-        oauth.BaseOAuth2.auth_complete = Mock(side_effect=AuthFailed('github', [1]))
+    #     # mock functions
+    #     monkeypatch.setattr(web, 'user_is_authenticated', lambda x: False)
+    #     monkeypatch.setattr(web, 'partial_pipeline_data', lambda x, y: None)
+    #     oauth.BaseOAuth2.auth_complete = Mock(side_effect=AuthFailed('github', [1]))
 
-        # mock request object
-        request = wsgi_request_factory()
-        request.session = Mock()
-        request.GET = {'code': 'test'}
-        request.user = None
+    #     # mock request object
+    #     request = wsgi_request_factory()
+    #     request.session = Mock()
+    #     request.GET = {'code': 'test'}
+    #     request.user = None
 
-        web.oauth_complete(request, 'github')
+    #     web.oauth_complete(request, 'github')
 
-    @pytest.mark.xfail(raises=SocialAuthFailed)
-    def test_without_code_xfail(self, wsgi_request_factory):
+    # @pytest.mark.xfail(raises=SocialAuthFailed)
+    # def test_without_code_xfail(self, wsgi_request_factory):
 
-        # mock request object
-        request = wsgi_request_factory()
-        request.session = Mock()
+    #     # mock request object
+    #     request = wsgi_request_factory()
+    #     request.session = Mock()
 
-        web.oauth_complete(request, 'github')
+    #     web.oauth_complete(request, 'github')
 
-    @pytest.mark.xfail(raises=SocialAuthNotConfigured)
-    def test_no_social_auth_redirect_url_xfail(self, settings, wsgi_request_factory, monkeypatch):
-        settings.SOCIAL_AUTH_LOGIN_REDIRECT_URLS['github'] = None
+    # @pytest.mark.xfail(raises=SocialAuthNotConfigured)
+    # def test_no_social_auth_redirect_url_xfail(self, settings, wsgi_request_factory, monkeypatch):
+    #     settings.SOCIAL_AUTH_LOGIN_REDIRECT_URLS['github'] = None
 
-        # mock functions
-        monkeypatch.setattr(web, 'user_is_authenticated', lambda x: False)
-        monkeypatch.setattr(web, 'partial_pipeline_data', lambda x, y: None)
+    #     # mock functions
+    #     monkeypatch.setattr(web, 'user_is_authenticated', lambda x: False)
+    #     monkeypatch.setattr(web, 'partial_pipeline_data', lambda x, y: None)
 
-        # mock request object
-        request = wsgi_request_factory()
-        request.session = Mock()
-        request.GET = {'code': 'test'}
-        request.user = None
+    #     # mock request object
+    #     request = wsgi_request_factory()
+    #     request.session = Mock()
+    #     request.GET = {'code': 'test'}
+    #     request.user = None
 
-        web.oauth_complete(request, 'github')
+    #     web.oauth_complete(request, 'github')
 
-    @pytest.mark.xfail(raises=SocialAuthNotConfigured)
-    def test_no_support_social_auth_backend_xfail(self, settings, wsgi_request_factory, monkeypatch):
-        del settings.SOCIAL_AUTH_LOGIN_REDIRECT_URLS['github']
+    # @pytest.mark.xfail(raises=SocialAuthNotConfigured)
+    # def test_no_support_social_auth_backend_xfail(self, settings, wsgi_request_factory, monkeypatch):
+    #     del settings.SOCIAL_AUTH_LOGIN_REDIRECT_URLS['github']
 
-        # mock functions
-        monkeypatch.setattr(web, 'user_is_authenticated', lambda x: False)
-        monkeypatch.setattr(web, 'partial_pipeline_data', lambda x, y: None)
+    #     # mock functions
+    #     monkeypatch.setattr(web, 'user_is_authenticated', lambda x: False)
+    #     monkeypatch.setattr(web, 'partial_pipeline_data', lambda x, y: None)
 
-        # mock request object
-        request = wsgi_request_factory()
-        request.session = Mock()
-        request.GET = {'code': 'test'}
-        request.user = None
+    #     # mock request object
+    #     request = wsgi_request_factory()
+    #     request.session = Mock()
+    #     request.GET = {'code': 'test'}
+    #     request.user = None
 
-        web.oauth_complete(request, 'github')
+    #     web.oauth_complete(request, 'github')
