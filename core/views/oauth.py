@@ -35,7 +35,7 @@ class AccessTokenViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
 
     filterset_fields = ('user__username',)
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    permission_classes = (IsSuperUser,)
+    # permission_classes = (IsSuperUser,)
     queryset = AccessToken.objects.all()
     serializer_class = AccessTokenSerializer
 

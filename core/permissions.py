@@ -57,7 +57,7 @@ class IsSuperUser(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user.is_active and request.user.is_superuser
+        return request.user and request.user.is_superuser
 
 
 class AllowAuthenticatedRead(permissions.BasePermission):
@@ -73,7 +73,7 @@ class AllowOnlyOrgAdmin(permissions.BasePermission):
         if request.user.is_anonymous:
             return False
 
-        if request.user.is_active and request.user.is_global_admin:
+        if request.user and request.user.is_global_admin:
             return True
 
         if request.user.is_org_admin:
@@ -84,7 +84,7 @@ class AllowOnlyOrgAdmin(permissions.BasePermission):
 
 class IsOrgMember(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.user.is_anonymous or not request.user.is_active:
+        if request.user.is_anonymous :
             return False
 
         if request.user.is_superuser or request.user.is_global_admin:
@@ -109,7 +109,7 @@ class IsOrgMember(permissions.BasePermission):
         should be allowed to act on a particular object
         """
 
-        if request.user.is_active and request.user.is_global_admin:
+        if request.user and request.user.is_global_admin:
             return True
         user_org = request.user.organization_id
         try:

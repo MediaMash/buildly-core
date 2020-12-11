@@ -50,7 +50,7 @@ class CoreGroupsPermissions(permissions.BasePermission):
             return workflowlevel2.workflowlevel1
 
     def has_permission(self, request, view):
-        if request.user.is_anonymous or not request.user.is_active:
+        if request.user.is_anonymous :
             return False
 
         if request.user.is_global_admin:
@@ -130,7 +130,7 @@ class CoreGroupsPermissions(permissions.BasePermission):
         return view.queryset
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_anonymous or not request.user.is_active:
+        if request.user.is_anonymous :
             return False
 
         # TODO: Need some optimization pre-fetching all user's core gropus

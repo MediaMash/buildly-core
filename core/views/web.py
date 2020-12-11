@@ -12,7 +12,7 @@ from rest_framework.reverse import reverse
 
 from social_core.exceptions import AuthFailed
 from social_core.utils import (partial_pipeline_data, setting_url,
-                               user_is_active, user_is_authenticated)
+                               user_is_authenticated)
 from social_django.utils import psa
 
 from core.exceptions import SocialAuthFailed, SocialAuthNotConfigured
@@ -81,12 +81,12 @@ def oauth_complete(request, backend, *args, **kwargs):
         tokens = generate_access_tokens(request, user)
         return JsonResponse(data=tokens, status=200)
     elif user:
-        if user_is_active(user):
+        # if user_is_active(user):
             # generate JWT/Bearer Token
             tokens = generate_access_tokens(request, user)
             return JsonResponse(data=tokens, status=200)
-        else:
-            url = setting_url(request.backend, 'INACTIVE_USER_URL', 'LOGIN_ERROR_URL', 'LOGIN_URL')
+        # else:
+        #     url = setting_url(request.backend, 'INACTIVE_USER_URL', 'LOGIN_ERROR_URL', 'LOGIN_URL')
     else:
         url = setting_url(request.backend, 'LOGIN_ERROR_URL', 'LOGIN_URL')
 
