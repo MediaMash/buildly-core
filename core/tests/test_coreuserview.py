@@ -129,25 +129,6 @@ class TestCoreUserCreate:
         assert user.first_name == TEST_USER_DATA['first_name']
         assert user.last_name == TEST_USER_DATA['last_name']
         assert user.organization.name == TEST_USER_DATA['organization_name']
-        assert not user.is_active
-
-        # check this user is NOT org admin
-        assert not user.is_org_admin
-
-    def test_registration_of_invited_org_user(self, request_factory, org_admin):
-        data = TEST_USER_DATA.copy()
-        token = create_invitation_token(data['email'], org_admin.organization)
-        data['invitation_token'] = token
-
-        request = request_factory.post(reverse('coreuser-list'), data)
-        response = CoreUserViewSet.as_view({'post': 'create'})(request)
-        assert response.status_code == 201
-
-        user = CoreUser.objects.get(username=TEST_USER_DATA['username'])
-        assert user.email == TEST_USER_DATA['email']
-        assert user.first_name == TEST_USER_DATA['first_name']
-        assert user.last_name == TEST_USER_DATA['last_name']
-        assert user.organization.name == TEST_USER_DATA['organization_name']
         assert user.is_active
 
         # check this user is NOT org admin
@@ -162,7 +143,7 @@ class TestCoreUserCreate:
         request = request_factory.post(reverse('coreuser-list'), data)
         response = CoreUserViewSet.as_view({'post': 'create'})(request)
         assert response.status_code == 400
-    
+
     def test_email_mismatch_token_invalidation(self, request_factory, org_admin):
         data = TEST_USER_DATA.copy()
         token = create_invitation_token("foobar@example.com", org_admin.organization)
