@@ -25,6 +25,7 @@ from rest_framework.permissions import AllowAny
 
 class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                       mixins.CreateModelMixin, mixins.UpdateModelMixin,
+                      mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
     """
     A core user is an extension of the default User object.  A core user is also the primary relationship for identity
@@ -47,12 +48,16 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
 
     create:
     Create a new core user instance.
+
+    destroy:
+    Deletes a new core user instance.
     """
 
     SERIALIZERS_MAP = {
         'default': CoreUserSerializer,
         'create': CoreUserWritableSerializer,
         'update': CoreUserWritableSerializer,
+        'delete': CoreUserWritableSerializer,
         'partial_update': CoreUserWritableSerializer,
         'invite': CoreUserInvitationSerializer,
         'reset_password': CoreUserResetPasswordSerializer,
@@ -76,6 +81,11 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         user = get_object_or_404(queryset, pk=kwargs.get('pk'))
         serializer = self.get_serializer(instance=user, context={'request': request})
         return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['GET'], detail=False)
     def me(self, request, *args, **kwargs):
