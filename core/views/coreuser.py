@@ -95,8 +95,11 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         """
         # the particular user in CoreUser table
         user = self.get_object()
-        serializer = CoreUserAvatarSerializer(user, data=request.data)
+        serializer = CoreUserAvatarSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        serializer.save()
+        # if serializer.is_valid():
+        #     avatar = serializer.save()
         return Response(serializer.data)
 
     @swagger_auto_schema(methods=['post'],
