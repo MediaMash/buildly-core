@@ -14,3 +14,6 @@ drf-yasg==1.10.2
 requests==2.25.0
 aiohttp==3.5.4
 django-auth-ldap==2.1.0
+pillow==2.9.0
+django-storages==1.9.1
+boto3==1.11.12

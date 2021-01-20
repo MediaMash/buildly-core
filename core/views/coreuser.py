@@ -9,11 +9,12 @@ from rest_framework.response import Response
 import django_filters
 import jwt
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from core.models import CoreUser, Organization
 from core.serializers import (CoreUserSerializer, CoreUserWritableSerializer, CoreUserInvitationSerializer,
                               CoreUserResetPasswordSerializer, CoreUserResetPasswordCheckSerializer,
-                              CoreUserResetPasswordConfirmSerializer, CoreUserEventInvitationSerializer,)
+                              CoreUserResetPasswordConfirmSerializer, CoreUserEventInvitationSerializer, CoreUserAvatarSerializer)
 from core.permissions import AllowAuthenticatedRead, AllowOnlyOrgAdmin, IsOrgMember
 from core.swagger import (COREUSER_INVITE_RESPONSE, COREUSER_INVITE_CHECK_RESPONSE, COREUSER_RESETPASS_RESPONSE,
                           DETAIL_RESPONSE, SUCCESS_RESPONSE, TOKEN_QUERY_PARAM, COREUSER_INVITE_EVENT_CHECK_RESPONSE,)
@@ -59,6 +60,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         'reset_password_check': CoreUserResetPasswordCheckSerializer,
         'reset_password_confirm': CoreUserResetPasswordConfirmSerializer,
         'invite_event': CoreUserEventInvitationSerializer,
+        'update_avatar': CoreUserAvatarSerializer,
     }
 
     def list(self, request, *args, **kwargs):
@@ -84,6 +86,17 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         """
         user = request.user
         serializer = self.get_serializer(instance=user, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'], name='Update Avatar', parser_classes=(MultiPartParser, FormParser))
+    def update_avatar(self, request, pk=None, *args, **kwargs):
+        """
+        Update a user avatar
+        """
+        # the particular user in CoreUser table
+        user = self.get_object()
+        serializer = CoreUserAvatarSerializer(user, data=request.data)
+        serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
 
     @swagger_auto_schema(methods=['post'],

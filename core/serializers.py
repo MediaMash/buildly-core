@@ -150,6 +150,24 @@ class CoreUserWritableSerializer(CoreUserSerializer):
         return coreuser
 
 
+class CoreUserAvatarSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField()
+
+    class Meta:
+        model = CoreUser
+        fields = ('avatar',)
+
+    def update(self, instance, validated_data):
+        """
+        Update user avatar.
+        """
+        instance.avatar = validated_data.get("avatar", instance.avatar)
+        instance.save()
+        return instance
+
+
+
+
 class CoreUserInvitationSerializer(serializers.Serializer):
     emails = serializers.ListField(child=serializers.EmailField(),
                                    min_length=1, max_length=10)
