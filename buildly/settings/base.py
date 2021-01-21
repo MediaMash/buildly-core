@@ -209,6 +209,6 @@ AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
 DEFAULT_FILE_STORAGE = 'buildly.storage_backends.MediaStorage'
-AWS_URL_LINK = '.s3.amazonaws.com'
+AWS_URL_LINK = os.getenv('AWS_URL_LINK')
 HTTP = 'https://'
 AWS_DEFAULT_ACL = None

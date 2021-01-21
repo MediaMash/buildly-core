@@ -112,7 +112,7 @@ class CoreUserSerializer(serializers.ModelSerializer):
                 '/'+MediaStorage.location+'/'+str(instance.avatar)
         else:
             # response['avatar'] = None
-            response['avatar'] = 'https://buildly-coreuser-avatar.s3.us-east-2.amazonaws.com/media/default_pic.png'
+            response['avatar'] = 'https://mm-coreuser-avatar.s3.us-east-2.amazonaws.com/media/default_pic.png'
         return response
 
 
@@ -181,7 +181,7 @@ class CoreUserProfileSerializer(serializers.ModelSerializer):
                 '/'+MediaStorage.location+'/'+str(instance.avatar)
         else:
             # response['avatar'] = None
-            response['avatar'] = 'https://buildly-coreuser-avatar.s3.us-east-2.amazonaws.com/media/default_pic.png'
+            response['avatar'] = 'https://mm-coreuser-avatar.s3.us-east-2.amazonaws.com/media/default_pic.png'
         return response
 
     def update(self, instance, validated_data):
