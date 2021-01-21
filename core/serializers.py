@@ -111,7 +111,8 @@ class CoreUserSerializer(serializers.ModelSerializer):
             response['avatar'] = HTTP+AWS_STORAGE_BUCKET_NAME+AWS_URL_LINK + \
                 '/'+MediaStorage.location+'/'+str(instance.avatar)
         else:
-            response['avatar'] = None
+            # response['avatar'] = None
+            response['avatar'] = 'https://buildly-coreuser-avatar.s3.us-east-2.amazonaws.com/media/default_pic.png'
         return response
 
 
@@ -159,6 +160,31 @@ class CoreUserWritableSerializer(CoreUserSerializer):
             coreuser.core_groups.add(group)
 
         return coreuser
+
+
+class CoreUserProfileUpdateSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    password = serializers.CharField(required=False)
+
+    class Meta:
+        model = CoreUser
+        fields = ('first_name', 'last_name', 'password',)
+
+    def update(self, instance, validated_data):
+        """
+        Update user avatar.
+        """
+        password = validated_data.pop('password', None)
+        for (key, value) in validated_data.items():
+            # For the keys remaining in `validated_data`, we will set them on
+            # the current `CoreUser` instance one at a time.
+            setattr(instance, key, value)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+
+        return instance
 
 
 class CoreUserAvatarSerializer(serializers.ModelSerializer):

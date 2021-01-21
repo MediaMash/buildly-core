@@ -14,7 +14,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from core.models import CoreUser, Organization
 from core.serializers import (CoreUserSerializer, CoreUserWritableSerializer, CoreUserInvitationSerializer,
                               CoreUserResetPasswordSerializer, CoreUserResetPasswordCheckSerializer,
-                              CoreUserResetPasswordConfirmSerializer, CoreUserEventInvitationSerializer, CoreUserAvatarSerializer)
+                              CoreUserResetPasswordConfirmSerializer, CoreUserEventInvitationSerializer,
+                              CoreUserAvatarSerializer, CoreUserProfileUpdateSerializer)
 from core.permissions import AllowAuthenticatedRead, AllowOnlyOrgAdmin, IsOrgMember
 from core.swagger import (COREUSER_INVITE_RESPONSE, COREUSER_INVITE_CHECK_RESPONSE, COREUSER_RESETPASS_RESPONSE,
                           DETAIL_RESPONSE, SUCCESS_RESPONSE, TOKEN_QUERY_PARAM, COREUSER_INVITE_EVENT_CHECK_RESPONSE,)
@@ -53,8 +54,10 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     SERIALIZERS_MAP = {
         'default': CoreUserSerializer,
         'create': CoreUserWritableSerializer,
-        'update': CoreUserWritableSerializer,
-        'partial_update': CoreUserWritableSerializer,
+        # 'update': CoreUserWritableSerializer,
+        'update': CoreUserProfileUpdateSerializer,
+        # 'partial_update': CoreUserWritableSerializer,
+        'partial_update': CoreUserProfileUpdateSerializer,
         'invite': CoreUserInvitationSerializer,
         'reset_password': CoreUserResetPasswordSerializer,
         'reset_password_check': CoreUserResetPasswordCheckSerializer,
