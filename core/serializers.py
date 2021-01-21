@@ -162,43 +162,38 @@ class CoreUserWritableSerializer(CoreUserSerializer):
         return coreuser
 
 
-class CoreUserProfileUpdateSerializer(serializers.ModelSerializer):
+
+
+class CoreUserProfileSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
     first_name = serializers.CharField(required=False)
     last_name = serializers.CharField(required=False)
     password = serializers.CharField(required=False)
 
     class Meta:
         model = CoreUser
-        fields = ('first_name', 'last_name', 'password',)
+        fields = ('first_name', 'last_name', 'password', 'avatar',)
+
+    def to_representation(self, instance):
+        response = super(CoreUserProfileSerializer, self).to_representation(instance)
+        if instance.avatar:
+            response['avatar'] = HTTP+AWS_STORAGE_BUCKET_NAME+AWS_URL_LINK + \
+                '/'+MediaStorage.location+'/'+str(instance.avatar)
+        else:
+            # response['avatar'] = None
+            response['avatar'] = 'https://buildly-coreuser-avatar.s3.us-east-2.amazonaws.com/media/default_pic.png'
+        return response
 
     def update(self, instance, validated_data):
         """
         Update user avatar.
         """
         password = validated_data.pop('password', None)
-        for (key, value) in validated_data.items():
-            # For the keys remaining in `validated_data`, we will set them on
-            # the current `CoreUser` instance one at a time.
-            setattr(instance, key, value)
+        instance.first_name = validated_data.pop('first_name', instance.first_name)
+        instance.last_name = validated_data.pop('last_name', instance.last_name)
+        instance.avatar = validated_data.get("avatar", instance.avatar)
         if password is not None:
             instance.set_password(password)
-        instance.save()
-
-        return instance
-
-
-class CoreUserAvatarSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
-
-    class Meta:
-        model = CoreUser
-        fields = ('avatar',)
-
-    def update(self, instance, validated_data):
-        """
-        Update user avatar.
-        """
-        instance.avatar = validated_data.get("avatar", instance.avatar)
         if instance.avatar:
             instance.save()
         else:

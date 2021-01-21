@@ -15,7 +15,7 @@ from core.models import CoreUser, Organization
 from core.serializers import (CoreUserSerializer, CoreUserWritableSerializer, CoreUserInvitationSerializer,
                               CoreUserResetPasswordSerializer, CoreUserResetPasswordCheckSerializer,
                               CoreUserResetPasswordConfirmSerializer, CoreUserEventInvitationSerializer,
-                              CoreUserAvatarSerializer, CoreUserProfileUpdateSerializer)
+                              CoreUserProfileSerializer)
 from core.permissions import AllowAuthenticatedRead, AllowOnlyOrgAdmin, IsOrgMember
 from core.swagger import (COREUSER_INVITE_RESPONSE, COREUSER_INVITE_CHECK_RESPONSE, COREUSER_RESETPASS_RESPONSE,
                           DETAIL_RESPONSE, SUCCESS_RESPONSE, TOKEN_QUERY_PARAM, COREUSER_INVITE_EVENT_CHECK_RESPONSE,)
@@ -54,16 +54,14 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     SERIALIZERS_MAP = {
         'default': CoreUserSerializer,
         'create': CoreUserWritableSerializer,
-        # 'update': CoreUserWritableSerializer,
-        'update': CoreUserProfileUpdateSerializer,
-        # 'partial_update': CoreUserWritableSerializer,
-        'partial_update': CoreUserProfileUpdateSerializer,
+        'update': CoreUserWritableSerializer,
+        'partial_update': CoreUserWritableSerializer,
         'invite': CoreUserInvitationSerializer,
         'reset_password': CoreUserResetPasswordSerializer,
         'reset_password_check': CoreUserResetPasswordCheckSerializer,
         'reset_password_confirm': CoreUserResetPasswordConfirmSerializer,
         'invite_event': CoreUserEventInvitationSerializer,
-        'update_avatar': CoreUserAvatarSerializer,
+        'update_profile': CoreUserProfileSerializer,
     }
 
     def list(self, request, *args, **kwargs):
@@ -91,18 +89,16 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         serializer = self.get_serializer(instance=user, context={'request': request})
         return Response(serializer.data)
 
-    @action(detail=True, methods=['patch'], name='Update Avatar', parser_classes=(MultiPartParser, FormParser))
-    def update_avatar(self, request, pk=None, *args, **kwargs):
+    @action(detail=True, methods=['patch'], name='Update Profile', parser_classes=(MultiPartParser, FormParser))
+    def update_profile(self, request, pk=None, *args, **kwargs):
         """
-        Update a user avatar
+        Update a user Profile
         """
         # the particular user in CoreUser table
         user = self.get_object()
-        serializer = CoreUserAvatarSerializer(user, data=request.data, partial=True)
+        serializer = CoreUserProfileSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # if serializer.is_valid():
-        #     avatar = serializer.save()
         return Response(serializer.data)
 
     @swagger_auto_schema(methods=['post'],
@@ -268,7 +264,8 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                                'reset_password',
                                'reset_password_check',
                                'reset_password_confirm',
-                               'invite_check']:
+                               'invite_check',
+                               'update_profile']:
                 return [permissions.AllowAny()]
 
             if self.action in ['update', 'partial_update', 'invite']:
