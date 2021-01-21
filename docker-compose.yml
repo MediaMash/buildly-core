@@ -40,7 +40,8 @@ services:
       DEFAULT_ORG: "Default Organization"
       AWS_ACCESS_KEY_ID: 'AKIAZ65LYKJALOJNI76C'
       AWS_SECRET_ACCESS_KEY: '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'
-      STORAGE_BUCKET_NAME: 'buildly-coreuser-avatar'
+      STORAGE_BUCKET_NAME: 'mm-coreuser-avatar'
+      AWS_URL_LINK: '.s3.us-east-2.amazonaws.com'
       JWT_ISSUER: "buildly"
       JWT_PRIVATE_KEY_RSA_BUILDLY: |-
         -----BEGIN RSA PRIVATE KEY-----
