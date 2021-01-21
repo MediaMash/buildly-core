@@ -38,6 +38,9 @@ services:
       DATABASE_HOST: "postgres_buildly"
       DATABASE_PORT: "5432"
       DEFAULT_ORG: "Default Organization"
+      AWS_ACCESS_KEY_ID: 'AKIAZ65LYKJALOJNI76C'
+      AWS_SECRET_ACCESS_KEY: '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'
+      STORAGE_BUCKET_NAME: 'buildly-coreuser-avatar'
       JWT_ISSUER: "buildly"
       JWT_PRIVATE_KEY_RSA_BUILDLY: |-
         -----BEGIN RSA PRIVATE KEY-----

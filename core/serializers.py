@@ -9,8 +9,9 @@ from django.conf import settings
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template import Template, Context
-
 from rest_framework import serializers
+from buildly.settings.base import AWS_STORAGE_BUCKET_NAME, AWS_URL_LINK, HTTP
+from buildly.storage_backends import MediaStorage
 
 from oauth2_provider.models import AccessToken, Application, RefreshToken
 
@@ -82,6 +83,7 @@ class CoreUserSerializer(serializers.ModelSerializer):
     is_active = serializers.BooleanField(required=False)
     core_groups = CoreGroupSerializer(read_only=True, many=True)
     invitation_token = serializers.CharField(required=False)
+    avatar = serializers.ImageField(required=False)
 
     def validate_invitation_token(self, value):
         try:
@@ -98,10 +100,20 @@ class CoreUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CoreUser
         fields = ('id', 'core_user_uuid', 'first_name', 'last_name', 'email', 'username', 'is_active',
-                  'title', 'contact_info', 'privacy_disclaimer_accepted', 'organization', 'core_groups',
-                  'invitation_token')
+                  'title', 'contact_info', 'avatar', 'privacy_disclaimer_accepted', 'organization', 'core_groups',
+                  'invitation_token',)
         read_only_fields = ('core_user_uuid', 'organization',)
         depth = 1
+
+    def to_representation(self, instance):
+        response = super(CoreUserSerializer, self).to_representation(instance)
+        if instance.avatar:
+            response['avatar'] = HTTP+AWS_STORAGE_BUCKET_NAME+AWS_URL_LINK + \
+                '/'+MediaStorage.location+'/'+str(instance.avatar)
+        else:
+            # response['avatar'] = None
+            response['avatar'] = 'https://buildly-coreuser-avatar.s3.us-east-2.amazonaws.com/media/default_pic.png'
+        return response
 
 
 class CoreUserWritableSerializer(CoreUserSerializer):
@@ -148,6 +160,47 @@ class CoreUserWritableSerializer(CoreUserSerializer):
             coreuser.core_groups.add(group)
 
         return coreuser
+
+
+
+
+class CoreUserProfileSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    password = serializers.CharField(required=False)
+
+    class Meta:
+        model = CoreUser
+        fields = ('first_name', 'last_name', 'password', 'avatar',)
+
+    def to_representation(self, instance):
+        response = super(CoreUserProfileSerializer, self).to_representation(instance)
+        if instance.avatar:
+            response['avatar'] = HTTP+AWS_STORAGE_BUCKET_NAME+AWS_URL_LINK + \
+                '/'+MediaStorage.location+'/'+str(instance.avatar)
+        else:
+            # response['avatar'] = None
+            response['avatar'] = 'https://buildly-coreuser-avatar.s3.us-east-2.amazonaws.com/media/default_pic.png'
+        return response
+
+    def update(self, instance, validated_data):
+        """
+        Update user avatar.
+        """
+        password = validated_data.pop('password', None)
+        instance.first_name = validated_data.pop('first_name', instance.first_name)
+        instance.last_name = validated_data.pop('last_name', instance.last_name)
+        instance.avatar = validated_data.get("avatar", instance.avatar)
+        if password is not None:
+            instance.set_password(password)
+        if instance.avatar:
+            instance.save()
+        else:
+            instance.avatar = None
+            instance.save()
+
+        return instance
 
 
 class CoreUserInvitationSerializer(serializers.Serializer):
