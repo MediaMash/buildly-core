@@ -17,3 +17,4 @@ django-auth-ldap==2.1.0
 pillow==2.9.0
 django-storages==1.9.1
 boto3==1.11.12
+ics==0.7

@@ -23,6 +23,7 @@ from core.jwt_utils import create_invitation_token, create_invitation_token_even
 from core.email_utils import send_email
 
 from rest_framework.permissions import AllowAny
+from ics import Calendar, Event
 
 
 class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -296,7 +297,20 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         emails = request.data['emails']
         event_name = request.data['event_name']
         organization_name = request.data['organization_name']
+        start_date_time = request.data['start_date_time']
+        end_date_time = request.data['end_date_time']
+
         invitation_link_list = []
+
+        c = Calendar()
+        e = Event()
+        e.name = str(event_name)
+        e.begin = str(start_date_time)
+        e.end = str(end_date_time)
+        e.uid = event_uuid
+        e.organizer = str(organization_name)
+        c.events.add(e)
+
         for email in emails:
             user = CoreUser.objects.filter(email=email).first()
             # if the user is registered
@@ -324,7 +338,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                 }
                 template_name = 'email/coreuser/invite_event.txt'
                 html_template_name = 'email/coreuser/invite_event.html'
-                send_email(email_address, subject, context, template_name, html_template_name)
+                send_email(email_address, subject, context, template_name, html_template_name, str(c))
             # if the user is not registered
             else:
                 """
@@ -352,7 +366,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                 }
                 template_name = 'email/coreuser/invite_event.txt'
                 html_template_name = 'email/coreuser/invite_event.html'
-                send_email(email_address, subject, context, template_name, html_template_name)
+                send_email(email_address, subject, context, template_name, html_template_name, str(c))
         return Response(
             {
                 'detail': 'The invitations were sent successfully.',
