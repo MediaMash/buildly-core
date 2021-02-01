@@ -23,7 +23,8 @@ from core.jwt_utils import create_invitation_token, create_invitation_token_even
 from core.email_utils import send_email
 
 from rest_framework.permissions import AllowAny
-from ics import Calendar, Event
+from ics import Calendar, Event, Organizer
+from buildly.settings.email import DEFAULT_FROM_EMAIL
 
 
 class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -308,7 +309,7 @@ class CoreUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         e.begin = str(start_date_time)
         e.end = str(end_date_time)
         e.uid = event_uuid
-        e.organizer = str(organization_name)
+        e.organizer = Organizer(common_name=str(organization_name), email=DEFAULT_FROM_EMAIL)
         c.events.add(e)
 
         for email in emails:
