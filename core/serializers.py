@@ -207,7 +207,7 @@ class CoreUserProfileSerializer(serializers.ModelSerializer):
 
 class CoreUserInvitationSerializer(serializers.Serializer):
     emails = serializers.ListField(child=serializers.EmailField(),
-                                   min_length=1, max_length=10)
+                                   min_length=1)
 
 
 class CoreUserEventInvitationSerializer(serializers.Serializer):
@@ -217,9 +217,11 @@ class CoreUserEventInvitationSerializer(serializers.Serializer):
     room_uuid = serializers.UUIDField()
     event_uuid = serializers.UUIDField()
     emails = serializers.ListField(child=serializers.CharField(),
-                                   min_length=1, max_length=10)
+                                   min_length=1)
     event_name = serializers.CharField()
     organization_name = serializers.CharField()
+    start_date_time = serializers.DateTimeField()
+    end_date_time = serializers.DateTimeField()
 
 
 class CoreUserResetPasswordSerializer(serializers.Serializer):
